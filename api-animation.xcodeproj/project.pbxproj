@@ -13,6 +13,8 @@
 		BC94C9CE24CCE3D4004F79AA /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = BC94C9CC24CCE3D4004F79AA /* Main.storyboard */; };
 		BC94C9D024CCE3D6004F79AA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BC94C9CF24CCE3D6004F79AA /* Assets.xcassets */; };
 		BC94C9D324CCE3D6004F79AA /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = BC94C9D124CCE3D6004F79AA /* LaunchScreen.storyboard */; };
+		BC94C9DB24CCE489004F79AA /* CustomAnimation.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC94C9DA24CCE489004F79AA /* CustomAnimation.swift */; };
+		BC94C9DD24CCE77C004F79AA /* View.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC94C9DC24CCE77C004F79AA /* View.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -24,6 +26,8 @@
 		BC94C9CF24CCE3D6004F79AA /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		BC94C9D224CCE3D6004F79AA /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		BC94C9D424CCE3D6004F79AA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		BC94C9DA24CCE489004F79AA /* CustomAnimation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomAnimation.swift; sourceTree = "<group>"; };
+		BC94C9DC24CCE77C004F79AA /* View.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = View.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -63,6 +67,8 @@
 				BC94C9CF24CCE3D6004F79AA /* Assets.xcassets */,
 				BC94C9D124CCE3D6004F79AA /* LaunchScreen.storyboard */,
 				BC94C9D424CCE3D6004F79AA /* Info.plist */,
+				BC94C9DA24CCE489004F79AA /* CustomAnimation.swift */,
+				BC94C9DC24CCE77C004F79AA /* View.swift */,
 			);
 			path = "api-animation";
 			sourceTree = "<group>";
@@ -140,7 +146,9 @@
 			files = (
 				BC94C9CB24CCE3D4004F79AA /* ViewController.swift in Sources */,
 				BC94C9C724CCE3D4004F79AA /* AppDelegate.swift in Sources */,
+				BC94C9DD24CCE77C004F79AA /* View.swift in Sources */,
 				BC94C9C924CCE3D4004F79AA /* SceneDelegate.swift in Sources */,
+				BC94C9DB24CCE489004F79AA /* CustomAnimation.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
