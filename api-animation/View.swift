@@ -11,36 +11,25 @@ import UIKit
 
 extension UIView {
     
-    func performeAnimations(_ mode: CustomAnimation.AnimationMode, with animations: [CustomAnimation]) {
-        switch mode {
-        case .inSequence:
-            performeAnimattionsInSequence(animations)
-        case .inParallele:
-            performeAnimationsInParallele(animations)
+    func performeAnimations(_ mode: CustomAnimation.AnimationMode, with animations: CustomAnimation...) {
+        var animators = [UIViewPropertyAnimator]()
+        
+        animations.forEach {
+            let newAnimator = UIViewPropertyAnimator.animator(from: $0)
+            newAnimator.addCustomAnimation($0.animationBlock, to: self)
+            newAnimator.addCustomAnimationCompletion($0.animationCompletionBlock, to: self)
+            animators.append(newAnimator)
+        }
+
+        UIViewPropertyAnimator.executePreAnimationTransform(animations, to: self)
+        var delay = 0.0
+        animators.forEach {
+            $0.startAnimation(afterDelay: delay)
+            delay = mode == .inSequence ? $0.duration : 0.0
         }
     }
     
-    private func performeAnimationsInParallele(_ animations: [CustomAnimation]) {
-        for animation in animations {
-            executeCustomAnimationBlock(animation)
-        }
-    }
-    
-    private func performeAnimattionsInSequence(_ animations: [CustomAnimation]) {
-        var animationsLeft = animations
-        let nextAnimation = animationsLeft.removeFirst()
-        executeCustomAnimationBlock(nextAnimation, animationsLeft)
-    }
-    
-    private func executeCustomAnimationBlock(_ animation: CustomAnimation, _ animationsLeft: [CustomAnimation] = []) {
-        animation.preAnimationBlock?(self)
-        UIView.animate(withDuration: animation.duration, delay: animation.delay, options: animation.options, animations: {
-            animation.animationBlock(self)
-        }, completion: {_ in
-            animation.animationCompletionBlock?()
-            if !animationsLeft.isEmpty {
-                self.performeAnimattionsInSequence(animationsLeft)
-            }
-        })
+    func performeAnimation(_ animation: CustomAnimation) {
+        performeAnimations(.inParallel, with: animation)
     }
 }

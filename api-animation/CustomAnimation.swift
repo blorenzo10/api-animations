@@ -12,6 +12,7 @@ import UIKit
 enum AnimationType: Equatable {
     case fade(FadeType)
     case scale(ScaleType)
+    case bounce(BounceType)
 }
 
 extension AnimationType {
@@ -24,21 +25,28 @@ extension AnimationType {
         case scaleIn
         case scaleOut
     }
+    
+    enum BounceType {
+        case bounceIn
+        case bounceOut
+    }
 }
 
 public struct CustomAnimation {
     
     let duration: TimeInterval
-    let delay: TimeInterval
-    var options: UIView.AnimationOptions
+    let delay: CGFloat
+    let dumpingRatio: CGFloat?
+    var curve: UIView.AnimationCurve
     let animationBlock: AnimationBlock
     var preAnimationBlock: PreAnimationBlock?
     var animationCompletionBlock: AnimationCompletionBlock?
     
-    init(duration: TimeInterval, delay: TimeInterval = 0, options: UIView.AnimationOptions = [], animationBlock: @escaping AnimationBlock, preAnimationBlock: PreAnimationBlock? = nil, animationCompletionBlock: AnimationCompletionBlock? = nil) {
+    init(duration: TimeInterval, delay: CGFloat = 0, dumpingRatio: CGFloat? = nil, curve: UIView.AnimationCurve = .easeInOut, animationBlock: @escaping AnimationBlock, preAnimationBlock: PreAnimationBlock? = nil, animationCompletionBlock: AnimationCompletionBlock? = nil) {
         self.duration = duration
         self.delay = delay
-        self.options = options
+        self.dumpingRatio = dumpingRatio
+        self.curve = curve
         self.animationBlock = animationBlock
         self.preAnimationBlock = preAnimationBlock
         self.animationCompletionBlock = animationCompletionBlock
@@ -50,11 +58,11 @@ public struct CustomAnimation {
 extension CustomAnimation {
     typealias AnimationBlock = (UIView) -> Void
     typealias PreAnimationBlock = (UIView) -> Void
-    typealias AnimationCompletionBlock = () -> Void
+    typealias AnimationCompletionBlock = (UIView) -> Void
     typealias ScaleFactor = (x: CGFloat, y: CGFloat)
     
     enum AnimationMode {
-        case inParallele
+        case inParallel
         case inSequence
     }
 }
@@ -63,21 +71,30 @@ extension CustomAnimation {
 
 extension CustomAnimation {
         
-    static func fade(_ type: AnimationType.FadeType, withDuration duration: TimeInterval = 0.3, onCompletion completion: AnimationCompletionBlock? = nil) -> CustomAnimation {
+    static func fade(_ type: AnimationType.FadeType, withDuration duration: TimeInterval = 0.3, delay: CGFloat = 0, onCompletion completion: AnimationCompletionBlock? = nil) -> CustomAnimation {
         switch type {
         case .fadeIn:
-            return fadeIn(withDuration: duration, completion: completion)
+            return fadeIn(withDuration: duration, delay: delay, completion: completion)
         case .fadeOut:
-            return fadeOut(withDuration: duration, completion: completion)
+            return fadeOut(withDuration: duration, delay: delay, completion: completion)
         }
     }
     
-    static func scale(_ type: AnimationType.ScaleType, withDuration duration: TimeInterval = 0.3, scaleFactor: ScaleFactor, onCompletion completion: AnimationCompletionBlock? = nil) -> CustomAnimation {
+    static func scale(_ type: AnimationType.ScaleType, withDuration duration: TimeInterval = 0.3, delay: CGFloat = 0, scaleFactor: ScaleFactor, onCompletion completion: AnimationCompletionBlock? = nil) -> CustomAnimation {
         switch type {
         case .scaleIn:
-            return scaleIn(withDuration: duration, scaleFactor: scaleFactor, completion: completion)
+            return scaleIn(withDuration: duration, delay: delay, scaleFactor: scaleFactor, completion: completion)
         case .scaleOut:
-            return scaleOut(withDuration: duration, scaleFactor: scaleFactor, completion: completion)
+            return scaleOut(withDuration: duration, delay: delay, scaleFactor: scaleFactor, completion: completion)
+        }
+    }
+    
+    static func bounce(_ type: AnimationType.BounceType, withDuration duration: TimeInterval = 0.3, delay: CGFloat = 0, dumpingRatio: CGFloat = 0.2, scaleFactor: ScaleFactor, onCompletion completion: AnimationCompletionBlock? = nil) -> CustomAnimation {
+        switch type {
+        case .bounceIn:
+            return bounceIn(withDuration: duration, delay: delay, dumpingRatio: dumpingRatio, scaleFactor: scaleFactor, completion: completion)
+        case .bounceOut:
+            return bounceOut(withDuration: duration, delay: delay, dumpingRatio: dumpingRatio, scaleFactor: scaleFactor, completion: completion)
         }
     }
 }
@@ -88,35 +105,51 @@ private extension CustomAnimation {
 
     // MARK: - Fade
     
-    private static func fadeIn(withDuration duration: TimeInterval, completion: AnimationCompletionBlock?) -> CustomAnimation {
-        return CustomAnimation(duration: duration, animationBlock: { view in
+    private static func fadeIn(withDuration duration: TimeInterval, delay: CGFloat = 0, completion: AnimationCompletionBlock?) -> CustomAnimation {
+        return CustomAnimation(duration: duration, delay: delay, animationBlock: { view in
             view.alpha = 1
         }, preAnimationBlock: { view in
             view.alpha = 0
         }, animationCompletionBlock: completion)
     }
     
-    private static func fadeOut(withDuration duration: TimeInterval, completion: AnimationCompletionBlock?) -> CustomAnimation {
-        return CustomAnimation(duration: duration, animationBlock: { view in
+    private static func fadeOut(withDuration duration: TimeInterval, delay: CGFloat = 0, completion: AnimationCompletionBlock?) -> CustomAnimation {
+        return CustomAnimation(duration: duration, delay: delay, animationBlock: { view in
             view.alpha = 0
         }, animationCompletionBlock: completion)
     }
     
-    // MARL: - Scale
+    // MARK: - Scale
     
-    private static func scaleIn(withDuration duration: TimeInterval, scaleFactor: ScaleFactor, completion: AnimationCompletionBlock?) -> CustomAnimation {
-        return CustomAnimation(duration: duration, animationBlock: { view in
+    private static func scaleIn(withDuration duration: TimeInterval, delay: CGFloat, scaleFactor: ScaleFactor, completion: AnimationCompletionBlock?) -> CustomAnimation {
+        return CustomAnimation(duration: duration, delay: delay, animationBlock: { view in
+            view.transform = .init(scaleX: scaleFactor.x, y: scaleFactor.y)
+        }, animationCompletionBlock: completion)
+    }
+    
+    private static func scaleOut(withDuration duration: TimeInterval, delay: CGFloat, scaleFactor: ScaleFactor, completion: AnimationCompletionBlock?) -> CustomAnimation {
+        return CustomAnimation(duration: duration, delay: delay, animationBlock: { view in
+            view.transform = .init(scaleX: scaleFactor.x, y: scaleFactor.y)
+        }, preAnimationBlock: { view in
+            view.transform = .identity
+        }, animationCompletionBlock: completion)
+    }
+    
+    // MARK: - Bounce
+    
+    private static func bounceIn(withDuration duration: TimeInterval, delay: CGFloat, dumpingRatio: CGFloat, scaleFactor: ScaleFactor, completion: AnimationCompletionBlock?) -> CustomAnimation {
+        
+        return CustomAnimation(duration: duration, delay: delay, dumpingRatio: dumpingRatio, animationBlock: { view in
             view.transform = .identity
         }, preAnimationBlock: { view in
             view.transform = .init(scaleX: scaleFactor.x, y: scaleFactor.y)
         }, animationCompletionBlock: completion)
     }
     
-    private static func scaleOut(withDuration duration: TimeInterval, scaleFactor: ScaleFactor, completion: AnimationCompletionBlock?) -> CustomAnimation {
-        return CustomAnimation(duration: duration, animationBlock: { view in
+    private static func bounceOut(withDuration duration: TimeInterval, delay: CGFloat, dumpingRatio: CGFloat, scaleFactor: ScaleFactor, completion: AnimationCompletionBlock?) -> CustomAnimation {
+        
+        return CustomAnimation(duration: duration, delay: delay, dumpingRatio: dumpingRatio, animationBlock: { view in
             view.transform = .init(scaleX: scaleFactor.x, y: scaleFactor.y)
-        }, preAnimationBlock: { view in
-            view.transform = .identity
         }, animationCompletionBlock: completion)
     }
 }
