@@ -2,7 +2,7 @@
 This is an animation wrapper built over UIViewPropertyAnimator in order to make the animations code more readable and clean
 
 ### Usage
-`````swift
+```swift
 view.performeAnimations(.inParallel,
 	with:
 		.scale(.scaleIn, withDuration: 1.5, scaleFactor: CustomAnimation.ScaleFactor(x: 1.3, y: 1.3)),
